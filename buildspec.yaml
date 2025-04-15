@@ -1,0 +1,32 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - echo "Checking Docker version..."
+      - docker --version
+
+  build:
+    commands:
+      - echo "Building Docker image..."
+      - docker build -t $ECS_REPO_NAME .
+      - docker tag $ECS_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECS_REPO_NAME:latest
+
+  post_build:
+    commands:
+      - echo "Pushing Docker image to ECR..."
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECS_REPO_NAME:latest
+      - echo "Updating ECS service..."
+      - aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment --region $AWS_DEFAULT_REGION
+      - echo "Deployment complete!"
+
+env:
+  variables:
+    ECS_REPO_NAME: "daggula-assign4"              # Must match your ECR repo name
+    ECS_CLUSTER_NAME: "daggula-stack-cluster"    # From CloudFormation
+    ECS_SERVICE_NAME: "daggula-fargate-service"        # From CloudFormation
+    # These are auto-populated by CodeBuild:
+    AWS_ACCOUNT_ID: "904233128713"                # Your AWS account ID
+    AWS_DEFAULT_REGION: "us-east-1"               # Your region
