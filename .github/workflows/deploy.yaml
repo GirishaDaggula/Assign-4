@@ -3,14 +3,14 @@ name: Build and Deploy to ECS
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]  # Trigger on commits to main branch
+    branches: [ main ]  
 
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: daggula-assign4
-  ECS_SERVICE: my-fargate-service
-  ECS_CLUSTER: your-cluster-name  # From CloudFormation outputs
-  CONTAINER_NAME: my-app-container
+  ECS_SERVICE: daggula-fargate-service
+  ECS_CLUSTER: daggula-stack-cluster  
+  CONTAINER_NAME: daggula-fargate-service-container
 
 jobs:
   deploy:
