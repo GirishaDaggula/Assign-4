@@ -18,21 +18,22 @@ phases:
     commands:
       - echo "Pushing Docker image to ECR..."
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - echo "Updating ECS service..."
-      - aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment --region $AWS_DEFAULT_REGION
       - echo "Generating imagedefinitions.json..."
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json
+      - echo "Updating ECS service..."
+      - aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment --region $AWS_DEFAULT_REGION
 
 artifacts:
   files:
-    - imagedefinitions.json
+    - 'imagedefinitions.json'
+  base-directory: '.'
 
 env:
   variables:
     IMAGE_REPO_NAME: "daggula-assign4"
     ECS_CLUSTER_NAME: "daggula-stack-cluster"
     ECS_SERVICE_NAME: "daggula-fargate-service"
-    CONTAINER_NAME: "daggula-fargate-service-container"
+    CONTAINER_NAME: "daggula-fargate-service-container"  # MUST match your task definition
     IMAGE_TAG: "latest"
     AWS_ACCOUNT_ID: "904233128713"
     AWS_DEFAULT_REGION: "us-east-1"
